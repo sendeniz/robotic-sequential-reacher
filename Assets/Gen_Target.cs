@@ -36,17 +36,21 @@ public class Gen_Target : MonoBehaviour
 
     // define a color map for targets
     Color[] colors = {Color.yellow, Color.blue, Color.red};
-
+	string[] colorNames = {"Yellow", "Blue", "Red"}; 
+	
     public void SpawnTarget()
     {
         // takes center of empty square game object, plus minus max ranged divided 2 for x,y,z to generate
         // numTargets within the space at random location
         Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
         GameObject newObject = Instantiate(Targetobj, pos, Quaternion.identity);
+		// newObject sets parent to parent of Targetobj
+		newObject.transform.parent = Targetobj.transform.parent;
         // assignes tag = "Target" for each generated target
         newObject.tag = "Target";
         // change color of Targets
         newObject.GetComponent<Renderer>().material.color = colors[i];
+		newObject.transform.name = colorNames[i];
     }
 
 

@@ -39,23 +39,25 @@ public class ReacherAgent : Agent
     /// <summary>
     /// We collect the normalized rotations, angularal velocities, and velocities of both
     /// limbs of the reacher as well as the relative position of the target and hand.
+	/// That is, here the observations for the input vector are collected.
     /// </summary>
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(pendulumA.transform.localPosition);
-        sensor.AddObservation(pendulumA.transform.rotation);
-        sensor.AddObservation(m_RbA.angularVelocity);
-        sensor.AddObservation(m_RbA.velocity);
+        sensor.AddObservation(pendulumA.transform.localPosition); // joint coordinates (vec. 3)
+        sensor.AddObservation(pendulumA.transform.rotation); // rotation of joint (quat. 4)
+        sensor.AddObservation(m_RbA.angularVelocity); // (vec 3)
+        sensor.AddObservation(m_RbA.velocity); // (vec 3)
 
-        sensor.AddObservation(pendulumB.transform.localPosition);
-        sensor.AddObservation(pendulumB.transform.rotation);
-        sensor.AddObservation(m_RbB.angularVelocity);
-        sensor.AddObservation(m_RbB.velocity);
+        sensor.AddObservation(pendulumB.transform.localPosition); // joint coordinates (vec 3)
+        sensor.AddObservation(pendulumB.transform.rotation); // rotation of joint (quat. 4)
+        sensor.AddObservation(m_RbB.angularVelocity); // (vec 3)
+        sensor.AddObservation(m_RbB.velocity); // (vec 3)
 
-        sensor.AddObservation(goal.transform.localPosition);
-        sensor.AddObservation(hand.transform.localPosition);
+        sensor.AddObservation(goal.transform.localPosition); // goal coordnates (vec 3)
+        sensor.AddObservation(hand.transform.localPosition); // hand cooardiantes (vec 3)
 
-        sensor.AddObservation(m_GoalSpeed);
+        sensor.AddObservation(m_GoalSpeed); // (1)
+        // total number of params. in input vector = 33
     }
 
     /// <summary>
