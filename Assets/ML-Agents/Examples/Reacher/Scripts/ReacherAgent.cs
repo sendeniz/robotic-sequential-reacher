@@ -8,6 +8,8 @@ public class ReacherAgent : Agent
     public GameObject pendulumB;
     public GameObject hand;
     public GameObject goal;
+    public GameObject active;
+
     float m_GoalDegree;
     Rigidbody m_RbA;
     Rigidbody m_RbB;
@@ -34,6 +36,11 @@ public class ReacherAgent : Agent
         m_ResetParams = Academy.Instance.EnvironmentParameters;
 
         SetResetParameters();
+        // give parent of Reachear Agent, which is Random Target and initialize Gen_Target script
+        gameObject.transform.parent.GetComponent<Gen_Target>().init();
+        gameObject.transform.parent.GetComponent<Game_Manager>().init();
+        // Call get.Active from game manager, bc Game Manager is initlized after Reacher Agent
+        active = gameObject.transform.parent.GetComponent<Game_Manager>().getActive();
     }
 
     /// <summary>
@@ -53,7 +60,10 @@ public class ReacherAgent : Agent
         sensor.AddObservation(m_RbB.angularVelocity); // (vec 3)
         sensor.AddObservation(m_RbB.velocity); // (vec 3)
 
-        sensor.AddObservation(goal.transform.localPosition); // goal coordnates (vec 3)
+        //sensor.AddObservation(goal.transform.localPosition); // goal coordnates (vec 3)
+		// Debug.Log(active.transform.parent);
+        // Debug.Log(active.transform.parent.localPosition); // print out input vec of active target
+        sensor.AddObservation(active.transform.parent.localPosition); // takes position of active target
         sensor.AddObservation(hand.transform.localPosition); // hand cooardiantes (vec 3)
 
         sensor.AddObservation(m_GoalSpeed); // (1)
@@ -89,6 +99,11 @@ public class ReacherAgent : Agent
     //    goal.transform.position = new Vector3(goalY, goalZ, goalX) + transform.position;
     //}
 
+
+    void Update()
+    {
+        active = GameObject.FindGameObjectWithTag("Active");
+    }
     /// <summary>
     /// Resets the position and velocity of the agent and the goal.
     /// </summary>

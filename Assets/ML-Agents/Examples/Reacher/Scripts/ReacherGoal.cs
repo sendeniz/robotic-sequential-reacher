@@ -1,15 +1,17 @@
 using UnityEngine;
+using System.Collections;
+using System.Threading;
 
 public class ReacherGoal : MonoBehaviour
 {
     public GameObject hand;
     public GameObject goalOn;
-	//public Game_Manager game_Manager;
 	public GameObject Random_Target_Gen;
+	private IEnumerator coroutine;
 	
 
     void OnStart() {
-
+		coroutine = waiter();
     }
 
     //obj_count = GameObject.FindGameObjectsWithTag("Target").length;
@@ -28,10 +30,24 @@ public class ReacherGoal : MonoBehaviour
             goalOn.transform.localScale = new Vector3(0f, 0f, 0f);
         }
     }
+	
 	void OnTriggerStay(Collider other)
 	{
-		//game_Manager.triggered(other);
-		Random_Target_Gen.GetComponent<Game_Manager>().triggered(other);
+		//if collision with hand
+		if (other.gameObject == hand)
+		{
+			//send Game_Manager Script the touched GameObject with the triggered method
+			StartCoroutine(waiter());
+			
+		}
+	}
+	
+	private IEnumerator waiter()
+	{
+		//Wait for 2 seconds
+		yield return new WaitForSecondsRealtime(2);
+		Random_Target_Gen.GetComponent<Game_Manager>().triggered(gameObject);
+
 	}
 
 }
