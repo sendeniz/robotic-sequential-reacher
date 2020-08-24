@@ -38,16 +38,13 @@ public class ReacherGoal : MonoBehaviour
 		{
 			//send Game_Manager Script the touched GameObject with the triggered method
 			StartCoroutine(waiter());
-			
 		}
 	}
 	
 	private IEnumerator waiter()
 	{
 		//Wait for 2 seconds
-		yield return new WaitForSecondsRealtime(2);
+		yield return new WaitForSecondsRealtime(1);
 		Random_Target_Gen.GetComponent<Game_Manager>().triggered(gameObject);
-
 	}
-
 }

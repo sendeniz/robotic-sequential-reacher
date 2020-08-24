@@ -20,24 +20,18 @@ public class Game_Manager : MonoBehaviour
     // define temporary color to change color of activated targets
     Color temp;
 
-    // params for counter for decaying reward
-    //public float timer = 0.0f;
-    //int seconds;
-    //int errortime;
-
     // Inter Stimulus Interval
     private IEnumerator coroutine;
+    public GameObject empty; 
 
-    // Start intializes everything before the first frame update
     void Start()
     {
-        //InvokeRepeating("OutputTime", 1f, 1f);  //1s delay, repeat every 1s
+
     }
    
-
     public void init()
     {
-
+        coroutine = CoroutineAction();
         targetObjects = GameObject.FindGameObjectsWithTag("Target");
         if (random_sequence == false)
         {
@@ -74,7 +68,6 @@ public class Game_Manager : MonoBehaviour
             matrix.SetRow(i, matrix.GetRow(j));
             matrix.SetRow(j, temp);
         }
-
         return matrix;
     }
 
@@ -96,7 +89,6 @@ public class Game_Manager : MonoBehaviour
             }
         }
     }
-
     // check for active target/goal object
     // round represents which of the four target should be touched within
     // a round as defined in sequenc matrix above
@@ -122,7 +114,7 @@ public class Game_Manager : MonoBehaviour
         // and unity does not support this. As such we use return 0.
         return 0;
     }
-
+    
     //When a sphere is touched the triggered method is called
     public void triggered(GameObject touchedSphere)
     {
@@ -131,54 +123,28 @@ public class Game_Manager : MonoBehaviour
         {
             // Console logs for meta information
             // DebugLog for touched sphere
-            //Debug.Log("Touched = " + touchedSphere);
+            Debug.Log("Touched = " + touchedSphere);
             // DebugLog for the active sphere that should be touched
-            //Debug.Log("active Object = " + targetObjects[checkActive(gameSequence)]);
+            Debug.Log("active Object = " + targetObjects[checkActive(gameSequence)]);
             // check if agent touches the active, correct target object
             if (touchedSphere == targetObjects[checkActive(gameSequence)])
             {
                 // and reward if correct target has been touched
-                agent.GetComponent<ReacherAgent>().AddReward(0.01f);
-
-                // Somewhere here 20 Timestep inter-stimulus interval (see Coroutine below, not complete yet)
-                // StartCoroutine(waiter());
+                agent.GetComponent<ReacherAgent>().AddReward(1.0f);
 
                 // then move onto the next round in the sequence
                 // Debug.Log(failCounter); // print fail counter
                 Debug.Log("rewarded"); // print message if correct target has been touched				
                 gameSequence++; // move one ahead in the sequence
-
-
-                //if we touched the last ball
-                if (gameSequence > 3)
-                {
-                    // Debug.Log("newRound");
-                    // sets the tag of GoalOn objct of the touchedSphere to Untagged
-                    touchedSphere.transform.GetChild(0).gameObject.tag = "Untagged";
-                    // set the color of the target back to its original
-                    touchedSphere.GetComponent<Renderer>().material.color = temp;
-                    // reset counters
-                    gameSequence = 0;
-                    failCounter = 0;
-                    // Start a new round
-                    initializeNewRound();
-                }
-                // else if it is not the last ball
-                else
-                {
-                    failCounter = 0;
-                    // since game sequence was set one ahead, checks which is the next active ball
-                    int active = checkActive(gameSequence);
-                    //sets the tag of GoalOn objct of the touchedSphere to Untagged
-                    touchedSphere.transform.GetChild(0).gameObject.tag = "Untagged";
-                    touchedSphere.GetComponent<Renderer>().material.color = temp;
-                    // sets the tag of the next balls GoalOn objct Active
-                    targetObjects[active].transform.GetChild(0).gameObject.tag = "Active";
-                    // save its color to temp
-                    temp = targetObjects[checkActive(gameSequence)].GetComponent<Renderer>().material.color;
-                    // let it light up
-                    targetObjects[active].GetComponent<Renderer>().material.color = new Color(224, 224, 224);
-                }
+                failCounter = 0;
+                // sets the tag of GoalOn objct of the touchedSphere to Untagged
+                touchedSphere.transform.GetChild(0).gameObject.tag = "Untagged";
+                // set the color of the target back to its original
+                touchedSphere.GetComponent<Renderer>().material.color = temp;
+                // Somewhere here 20 Timestep inter-stimulus interval (see Coroutine below, not complete yet)
+                // StartCoroutine(waiter());
+                empty.tag = "Active";
+                StartCoroutine(CoroutineAction());
             }
             else
             {
@@ -201,36 +167,71 @@ public class Game_Manager : MonoBehaviour
         //Debug.Log(sequence);
     }
 
-    // Defines waiter for 20 Timestep inter-stimulus interval (see above )
-    // coroutine however needs to include parts or whole chunk of code from above
-    // maybe other way than coroutine?
-    //private IEnumerator waiter()
-    //{
-    //    // Wait for 20 seconds Time steps
-    //    yield return new WaitForSecondsRealtime(20);
-    //}
-
-    float elapsed = 0f;
     void Update()
     {
         // every frame find and collect Targets
         targetObjects = GameObject.FindGameObjectsWithTag("Target");
-
-        // for every second deduce reward
-        elapsed += Time.deltaTime;
-        if (elapsed >= 1f)
-        {
-            elapsed = elapsed % 1f;
-            deductReward();
-        }
+        // deduct reward per frame/timestep
+        agent.GetComponent<ReacherAgent>().AddReward(-0.01f*0.99f); // add decay * 0.99
+        Debug.Log("deducted");
 
     }
 
-    void deductReward()
+    public static class WaitFor
     {
-        // deduct a reward every second timestep
-        agent.GetComponent<ReacherAgent>().AddReward(-0.01f);
-        Debug.Log("deducted");
+        public static IEnumerator Frames(int frameCount)
+        {
+
+            while (frameCount > 0)
+            {
+                frameCount--;
+                yield return null;
+            }
+        }
+    }
+
+
+    public IEnumerator CoroutineAction()
+    {
+     
+        // DO SMT HERE
+        //yield return StartCoroutine(WaitFor.Frames(20)); // wait for 20 frames
+        //                                                 // do some actions after 20 frames
+        //empty.tag = "Untagged";
+
+        if (gameSequence > 3)
+        {
+            gameSequence = 0;
+            failCounter = 0;
+
+            yield return StartCoroutine(WaitFor.Frames(20)); // wait for 20 frames
+                                                             // do some actions after 20 frames
+            empty.tag = "Untagged";
+            //Debug.Log(gameSequence);
+            //reset counters
+            //gameSequence = 0;
+            //failCounter = 0;
+
+            // Start a new round
+            initializeNewRound();
+        }
+        // else if it is not the last ball
+        else
+        {
+            yield return StartCoroutine(WaitFor.Frames(20)); // wait for 20 frames
+                                                             // do some actions after 20 frames
+            empty.tag = "Untagged";
+            // Debug.Log(gameSequence);
+            int active = checkActive(gameSequence);
+            // sets the tag of the next balls GoalOn objct Active
+            targetObjects[active].transform.GetChild(0).gameObject.tag = "Active";
+            // save its color to temp
+            temp = targetObjects[checkActive(gameSequence)].GetComponent<Renderer>().material.color;
+            // let it light up
+            targetObjects[active].GetComponent<Renderer>().material.color = new Color(224, 224, 224);
+
+        }
+
     }
 
 }
