@@ -1,6 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using Random = UnityEngine.Random;
+
 
 public class Game_Manager : MonoBehaviour
 {
@@ -123,9 +126,9 @@ public class Game_Manager : MonoBehaviour
         {
             // Console logs for meta information
             // DebugLog for touched sphere
-            Debug.Log("Touched = " + touchedSphere);
+            // Debug.Log("Touched = " + touchedSphere);
             // DebugLog for the active sphere that should be touched
-            Debug.Log("active Object = " + targetObjects[checkActive(gameSequence)]);
+            // Debug.Log("active Object = " + targetObjects[checkActive(gameSequence)]);
             // check if agent touches the active, correct target object
             if (touchedSphere == targetObjects[checkActive(gameSequence)])
             {
@@ -175,8 +178,21 @@ public class Game_Manager : MonoBehaviour
         agent.GetComponent<ReacherAgent>().AddReward(-0.01f*0.99f); // add decay * 0.99
         Debug.Log("deducted");
 
+        System.Random rand = new System.Random(); 
+        double u1 = 1.0 - rand.NextDouble(); //uniform distribution [0,1]
+        double u2 = 1.0 - rand.NextDouble();
+        double randStdNormal = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Sin(2.0 * Math.PI * u2); //random normal(0,1)
+        double mean = 0; // mean mu
+        double stdDev = 0.1; // standard deviation sigma 
+        double randNormal = mean + stdDev * randStdNormal; // generate values from the normal
+        float gen_val = (float)randNormal; // convert to float for position change per frame in vector below
+        //Debug.Log(gen_val);
+        // add gaussian noise distributed with mean=0,sigma = 0.1 to input vector during intertrial interval
+        //empty.transform.localPosition = new Vector3(0 , -4 , 0);
+        empty.transform.localPosition = new Vector3(0 + gen_val, -4 + gen_val, 0 + gen_val);
     }
 
+    // Counts frames for the intertrial interval
     public static class WaitFor
     {
         public static IEnumerator Frames(int frameCount)
@@ -190,14 +206,9 @@ public class Game_Manager : MonoBehaviour
         }
     }
 
-
+    // Coroutine defines the scheduling or execution time of code during the intertrial interval
     public IEnumerator CoroutineAction()
     {
-     
-        // DO SMT HERE
-        //yield return StartCoroutine(WaitFor.Frames(20)); // wait for 20 frames
-        //                                                 // do some actions after 20 frames
-        //empty.tag = "Untagged";
 
         if (gameSequence > 3)
         {
@@ -208,9 +219,6 @@ public class Game_Manager : MonoBehaviour
                                                              // do some actions after 20 frames
             empty.tag = "Untagged";
             //Debug.Log(gameSequence);
-            //reset counters
-            //gameSequence = 0;
-            //failCounter = 0;
 
             // Start a new round
             initializeNewRound();

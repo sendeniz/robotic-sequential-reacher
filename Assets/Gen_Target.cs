@@ -28,23 +28,6 @@ public class Gen_Target : MonoBehaviour
 
     void Start()
     {
-        //if (random_location == true)
-        //{
-        //    //randomize location of initial goal/target object
-        //    Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
-        //    goal.transform.position = pos;
-        //}
-        //else if (random_location == false)
-        //{
-        //    Vector3 pos = center + new Vector3(8, 0, 0);
-        //    goal.transform.position = pos;
-        //}
-        
-        //while (i != numTargets)
-        //{
-        //    SpawnTarget(i);
-        //    i = i + 1;
-        //    }
     }
 
     public void init() {
