@@ -9,7 +9,7 @@ public class Gen_Target : MonoBehaviour
     public GameObject Targetobj;
     // defines a Gameobject "goal", which is the initial green goal object in the ML agents reacher example
     public GameObject goal;
-
+    public GameObject agent;
     // defines the condition whether target generation is at random locations or fixed to be select in Unity envir.
     public bool random_location = false;
 
@@ -40,8 +40,7 @@ public class Gen_Target : MonoBehaviour
         }
         else if (random_location == false)
         {
-            Vector3 pos = center + new Vector3(8, 0, 0);
-            goal.transform.position = pos;
+            Vector3 pos = new Vector3(8.5f + agent.transform.position.x, -3.1f + agent.transform.position.y, 0.9f + agent.transform.position.z);
         }
 
         while (i != numTargets)
@@ -74,17 +73,20 @@ public class Gen_Target : MonoBehaviour
             // takes center of empty square game object, plus minus max ranged divided 2 for x,y,z to generate
             // numTargets within the space at random location
             //Vector3 pos = center + new Vector3((size.x / 2 )+i, (size.y / 2)+i, (size.z / 2)+i);
-            Vector3 pos = center + new Vector3(8, 0, 0);
+            Vector3 pos = new Vector3(8.5f + agent.transform.position.x, -3.1f + agent.transform.position.y, 0.9f + agent.transform.position.z);
             switch (i)
             {
                 case 0:
-                    pos = center + new Vector3(-8 , 0, 0);
+                    pos = new Vector3(-8.5f + agent.transform.position.x, -3.1f + agent.transform.position.y, 0.9f + agent.transform.position.z);
+                    //pos = center + new Vector3(-8 , 0, 0);
                     break;
                 case 1:
-                    pos = center + new Vector3(0, 0, -8 );
+                    //pos = center + new Vector3(0, 0, -12 );
+                    pos = new Vector3(0 + agent.transform.position.x, -3.1f + agent.transform.position.y, -8.5f + agent.transform.position.z);
                     break;
                 case 2:
-                    pos = center + new Vector3(0 , 0, 8);
+                    //pos = center + new Vector3(0 , 0, 12);
+                    pos = new Vector3(0 + agent.transform.position.x, -3.1f + agent.transform.position.y, 8.5f + agent.transform.position.z);
                     break; 
             }
             //Vector3 pos = center + new Vector3(8+i, -3, 1+i);

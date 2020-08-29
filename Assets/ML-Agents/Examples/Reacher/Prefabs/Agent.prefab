@@ -479,6 +479,7 @@ MonoBehaviour:
   pendulumB: {fileID: 1053261483945176}
   hand: {fileID: 1654288206095398}
   goal: {fileID: 1986879271678326}
+  active: {fileID: 0}
 --- !u!114 &6226801880261327134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -834,7 +835,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1986879271678326}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.41, y: -6.25, z: -9.8}
+  m_LocalPosition: {x: -2.4099998, y: -6.25, z: -9.799999}
   m_LocalScale: {x: 5, y: 5, z: 5}
   m_Children:
   - {fileID: 4836354168995630}
@@ -913,6 +914,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8c5005c8e6b84f1089c132cb87b44c4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agent: {fileID: 1395682910799436}
   hand: {fileID: 1654288206095398}
   goalOn: {fileID: 1065277484498824}
+  Random_Target_Gen: {fileID: 0}

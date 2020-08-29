@@ -23,6 +23,8 @@ public class Game_Manager : MonoBehaviour
     // define temporary color to change color of activated targets
     Color temp;
 
+    float rewardToGive = 1;
+
     // Inter Stimulus Interval
     private IEnumerator coroutine;
     public GameObject empty; 
@@ -133,12 +135,15 @@ public class Game_Manager : MonoBehaviour
             if (touchedSphere == targetObjects[checkActive(gameSequence)])
             {
                 // and reward if correct target has been touched
-                agent.GetComponent<ReacherAgent>().AddReward(1.0f);
+                //agent.GetComponent<ReacherAgent>().AddReward(1.0f);
+                agent.GetComponent<ReacherAgent>().AddReward(rewardToGive);
+
 
                 // then move onto the next round in the sequence
                 // Debug.Log(failCounter); // print fail counter
-                Debug.Log("rewarded"); // print message if correct target has been touched				
+                Debug.Log("rewarded by " + rewardToGive); // print message if correct target has been touched				
                 gameSequence++; // move one ahead in the sequence
+                rewardToGive = 1.0f;
                 failCounter = 0;
                 // sets the tag of GoalOn objct of the touchedSphere to Untagged
                 touchedSphere.transform.GetChild(0).gameObject.tag = "Untagged";
@@ -175,8 +180,10 @@ public class Game_Manager : MonoBehaviour
         // every frame find and collect Targets
         targetObjects = GameObject.FindGameObjectsWithTag("Target");
         // deduct reward per frame/timestep
-        agent.GetComponent<ReacherAgent>().AddReward(-0.01f*0.99f); // add decay * 0.99
-        Debug.Log("deducted");
+        //Debug.Log("deducted");
+
+        rewardToGive = rewardToGive * 0.99f;
+        rewardToGive = Math.Max(0.1f, rewardToGive);
 
         System.Random rand = new System.Random(); 
         double u1 = 1.0 - rand.NextDouble(); //uniform distribution [0,1]
