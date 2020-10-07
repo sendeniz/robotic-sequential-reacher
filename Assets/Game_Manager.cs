@@ -25,9 +25,12 @@ public class Game_Manager : MonoBehaviour
 
     float rewardToGive = 1;
 
+    public GameObject parent;
+
     // Inter Stimulus Interval
     private IEnumerator coroutine;
-    public GameObject empty; 
+    public GameObject empty;
+   
 
     void Start()
     {
@@ -37,7 +40,19 @@ public class Game_Manager : MonoBehaviour
     public void init()
     {
         coroutine = CoroutineAction();
-        targetObjects = GameObject.FindGameObjectsWithTag("Target");
+        // targetObjects = GameObject.FindGameObjectsWithTag("Target");
+
+        int c = 0;
+        foreach (Transform child in parent.transform)
+        {
+            if (child.tag == "Target")
+            {
+                targetObjects[c] = child.gameObject;
+                c++;
+            }
+        }
+
+
         if (random_sequence == false)
         {
             // set empty game object "Random_Gen_Target" as parent of Agent
@@ -88,6 +103,7 @@ public class Game_Manager : MonoBehaviour
             {
                 // if condition fulfilled, set target to active
                 targetObjects[i].transform.GetChild(0).gameObject.tag = "Active";
+                //targetObjects[i].transform.GetChild(1).name = "Active";
                 // set temp to color of active target i.e. blue, yellow etc.
                 temp = targetObjects[i].GetComponent<Renderer>().material.color;
                 targetObjects[i].GetComponent<Renderer>().material.color = new Color(224, 224, 224);
@@ -147,10 +163,9 @@ public class Game_Manager : MonoBehaviour
                 failCounter = 0;
                 // sets the tag of GoalOn objct of the touchedSphere to Untagged
                 touchedSphere.transform.GetChild(0).gameObject.tag = "Untagged";
+                // touchedSphere.transform.GetChild(1).name = "Unactive";
                 // set the color of the target back to its original
                 touchedSphere.GetComponent<Renderer>().material.color = temp;
-                // Somewhere here 20 Timestep inter-stimulus interval (see Coroutine below, not complete yet)
-                // StartCoroutine(waiter());
                 empty.tag = "Active";
                 StartCoroutine(CoroutineAction());
             }
@@ -178,13 +193,23 @@ public class Game_Manager : MonoBehaviour
     void Update()
     {
         // every frame find and collect Targets
-        targetObjects = GameObject.FindGameObjectsWithTag("Target");
+        // targetObjects = GameObject.FindGameObjectsWithTag("Target");
+        int c = 0;
+        foreach (Transform child in parent.transform)
+        {
+            if (child.tag == "Target")
+            {
+                targetObjects[c] = child.gameObject;
+                c++;
+            }
+        }
         // deduct reward per frame/timestep
         //Debug.Log("deducted");
 
         rewardToGive = rewardToGive * 0.99f;
         rewardToGive = Math.Max(0.1f, rewardToGive);
 
+        // Box Mueller Transformation to simulate values from a gaussian normal distribution 
         System.Random rand = new System.Random(); 
         double u1 = 1.0 - rand.NextDouble(); //uniform distribution [0,1]
         double u2 = 1.0 - rand.NextDouble();
@@ -240,6 +265,7 @@ public class Game_Manager : MonoBehaviour
             int active = checkActive(gameSequence);
             // sets the tag of the next balls GoalOn objct Active
             targetObjects[active].transform.GetChild(0).gameObject.tag = "Active";
+            // targetObjects[active].transform.GetChild(1).name = "Active";
             // save its color to temp
             temp = targetObjects[checkActive(gameSequence)].GetComponent<Renderer>().material.color;
             // let it light up
