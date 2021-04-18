@@ -1,6 +1,7 @@
 using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
+using System.Collections;
 
 public class ReacherAgent : Agent
 {
@@ -9,7 +10,7 @@ public class ReacherAgent : Agent
     public GameObject hand;
     public GameObject goal;
     public GameObject active;
-
+    public Game_Manager GameManager;
     float m_GoalDegree;
     Rigidbody m_RbA;
     Rigidbody m_RbB;
@@ -99,10 +100,31 @@ public class ReacherAgent : Agent
     //    goal.transform.position = new Vector3(goalY, goalZ, goalX) + transform.position;
     //}
 
+    private int time_steps = 0;
+   
+    IEnumerator WatchForEnoughSteps(int time_steps_interval)
+    {
+        while (time_steps < time_steps_interval)
+        {
+            yield return null;
+        }
+        time_steps = 0;
+    }
 
     void Update()
     {
-        active = GameObject.FindGameObjectWithTag("Active");
+        //Debug.Log(time_steps);
+        time_steps++;
+        active = gameObject.transform.parent.GetComponent<Game_Manager>().getActive();
+        if (GameManager.collision == true)
+        {
+            GameManager.collision = false;
+            StartCoroutine(WatchForEnoughSteps(100));
+        }
+        else
+        {
+            //do nothing
+        }
     }
     /// <summary>
     /// Resets the position and velocity of the agent and the goal.
@@ -123,7 +145,6 @@ public class ReacherAgent : Agent
         //UpdateGoalPosition();
 
         SetResetParameters();
-
 
         goal.transform.localScale = new Vector3(m_GoalSize, m_GoalSize, m_GoalSize);
     }

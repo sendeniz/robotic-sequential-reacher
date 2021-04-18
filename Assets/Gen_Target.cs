@@ -2,24 +2,30 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+
 public class Gen_Target : MonoBehaviour
 {
     // defines a  Gameobject "Targetprefab" to be selected in the Unity envir.
     // that is to be generated/cloned n number of times (see int numTargets=3)
     public GameObject Targetobj;
+    public Game_Manager GameManager;
     // defines a Gameobject "goal", which is the initial green goal object in the ML agents reacher example
     public GameObject goal;
     public GameObject agent;
     // defines the condition whether target generation is at random locations or fixed to be select in Unity envir.
     public bool random_location = false;
+    public GameObject parent;
+    public GameObject[] targetObjects = new GameObject[4];
 
     // define two vectors of size 3 to store x,y,z coordinates, centered and sized
     // according to the size of the empty game object, which defines all possible
-    // locaiton in 3D space for 4 targets to spawn randomly
+    // location in 3D space for 4 targets to spawn randomly
     // center used to determine middle point of the 3D cubic spawning area
 
-    public Vector3 center;
+    private Vector3 center;
     public Vector3 size;
+
+    //private Vector3 test;
 
     // Defines parameters for targets, since we start with 1 inital target, if
     // total number of targets desired is 4, numTargets = 3 new targets + 1 initial target = 4 total
@@ -28,12 +34,16 @@ public class Gen_Target : MonoBehaviour
 
     void Start()
     {
+        //center = transform.Find("Agent").transform.position;
+        //Debug.Log("The center Agent Location:" + center);
     }
 
-    public void init() {
+    public void init()
+    {
 
         if (random_location == true)
         {
+            center = transform.Find("Agent").transform.position;
             //randomize location of initial goal/target object
             Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
             goal.transform.position = pos;
@@ -51,12 +61,14 @@ public class Gen_Target : MonoBehaviour
     }
 
     // define a color map for targets
-    Color[] colors = {Color.yellow, Color.blue, Color.red};
-	string[] colorNames = {"Yellow", "Blue", "Red"}; 
-	
+    Color[] colors = { Color.yellow, Color.blue, Color.red };
+    string[] colorNames = { "Yellow", "Blue", "Red" };
+
     public void SpawnTarget(int i)
     {
-        if (random_location == true) {
+        if (random_location == true)
+        {
+            center = transform.Find("Agent").transform.position;
             // takes center of empty square game object, plus minus max ranged divided 2 for x,y,z to generate
             // numTargets within the space at random location
             Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
@@ -69,10 +81,11 @@ public class Gen_Target : MonoBehaviour
             newObject.GetComponent<Renderer>().material.color = colors[i];
             newObject.transform.name = colorNames[i];
         }
-        else if (random_location == false) {
+        else if (random_location == false)
+        {
             // takes center of empty square game object, plus minus max ranged divided 2 for x,y,z to generate
             // numTargets within the space at random location
-            //Vector3 pos = center + new Vector3((size.x / 2 )+i, (size.y / 2)+i, (size.z / 2)+i);
+            // Vector3 pos = center + new Vector3((size.x / 2 )+i, (size.y / 2)+i, (size.z / 2)+i);
             Vector3 pos = new Vector3(8.5f + agent.transform.position.x, -3.1f + agent.transform.position.y, 0.9f + agent.transform.position.z);
             switch (i)
             {
@@ -87,7 +100,7 @@ public class Gen_Target : MonoBehaviour
                 case 2:
                     //pos = center + new Vector3(0 , 0, 12);
                     pos = new Vector3(0 + agent.transform.position.x, -3.1f + agent.transform.position.y, 8.5f + agent.transform.position.z);
-                    break; 
+                    break;
             }
             //Vector3 pos = center + new Vector3(8+i, -3, 1+i);
             GameObject newObject = Instantiate(Targetobj, pos, Quaternion.identity);
@@ -101,12 +114,52 @@ public class Gen_Target : MonoBehaviour
         }
     }
 
-
-
     // Defines color, cube object form of the empty game object
     void OnDrawGizmosSelected()
     {
+        center = transform.Find("Agent").transform.position;
         Gizmos.color = new Color(1, 0, 0, 0.5f);
         Gizmos.DrawCube(center, size);
+    }
+
+    void Update()
+    {
+        center = transform.Find("Agent").transform.position;
+        if (GameManager.sequence_end == true)
+        {
+            int c = 0;
+            foreach (Transform child in parent.transform)
+            {
+                if (child.tag == "Target")
+                {
+                    targetObjects[c] = child.gameObject;
+                    c++;
+                }
+            }
+            for (int i = 0; i < 4; i++)
+            {
+                if (random_location == true)
+                {
+                    center = transform.Find("Agent").transform.position;
+                    Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
+                    //Vector3 pos = pos = new Vector3(0 + agent.transform.position.x, -3.1f + agent.transform.position.y, 8.5f + agent.transform.position.z);
+                    targetObjects[i].transform.position = pos;
+                    GameManager.sequence_end = false;
+                }
+
+                //else if (random_location == false)
+                //{
+                    //center = transform.Find("Agent").transform.position;
+                    //Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
+                //    Vector3 pos = pos = new Vector3(0 + agent.transform.position.x, -3.1f + agent.transform.position.y, 8.5f + agent.transform.position.z);
+                //    targetObjects[i].transform.position = pos;
+                //    GameManager.sequence_end = false;
+                //}
+            }
+            
+            //Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
+            //goal.transform.position = pos;
+            //GameManager.sequence_end = false;
+        }
     }
 }
