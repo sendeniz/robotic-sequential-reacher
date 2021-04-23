@@ -119,7 +119,8 @@ public class Gen_Target : MonoBehaviour
     {
         center = transform.Find("Agent").transform.position;
         Gizmos.color = new Color(1, 0, 0, 0.5f);
-        Gizmos.DrawCube(center, size);
+        //Gizmos.DrawCube(center, size);
+        Gizmos.DrawSphere(center, 14);
     }
 
     void Update()
