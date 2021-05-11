@@ -22,6 +22,10 @@ public class ReacherAgent : Agent
     float m_Deviation;
     // Frequency of the cosine deviation of the goal along the vertical dimension
     float m_DeviationFreq;
+    public GameObject agent;
+    private Vector3 size = new Vector3(14,14,14);
+    private Vector3 center;
+    private Vector3 target_observations;
 
     EnvironmentParameters m_ResetParams;
 
@@ -37,11 +41,13 @@ public class ReacherAgent : Agent
         m_ResetParams = Academy.Instance.EnvironmentParameters;
 
         SetResetParameters();
-        // give parent of Reachear Agent, which is Random Target and initialize Gen_Target script
+        // Custom init to resolve initalisaiton conflict that result in errors
         gameObject.transform.parent.GetComponent<Gen_Target>().init();
         gameObject.transform.parent.GetComponent<Game_Manager>().init();
-        // Call get.Active from game manager, bc Game Manager is initlized after Reacher Agent
+        // Call get.Active from Game Manager, because Game Manager is initlized after Reacher Agent
         active = gameObject.transform.parent.GetComponent<Game_Manager>().getActive();
+        // collect center location 
+        center = agent.transform.localPosition;
     }
 
     /// <summary>
@@ -51,24 +57,66 @@ public class ReacherAgent : Agent
     /// </summary>
     public override void CollectObservations(VectorSensor sensor)
     {
-        sensor.AddObservation(pendulumA.transform.localPosition); // joint coordinates (vec. 3)
-        sensor.AddObservation(pendulumA.transform.rotation); // rotation of joint (quat. 4)
-        sensor.AddObservation(m_RbA.angularVelocity); // (vec 3)
-        sensor.AddObservation(m_RbA.velocity); // (vec 3)
+        // if the ITI is active suspend the active target observation vector
+        if (iti_active == true)
+        {
+            // joint coordinates (vec. 3)
+            sensor.AddObservation(pendulumA.transform.localPosition);
+            // rotation of joint (quant. 4)
+            sensor.AddObservation(pendulumA.transform.rotation);
+            // (vec 3)
+            sensor.AddObservation(m_RbA.angularVelocity);
+            // (vec 3)
+            sensor.AddObservation(m_RbA.velocity);
+            // joint coordinates (vec 3)
+            sensor.AddObservation(pendulumB.transform.localPosition);
+            // rotation of joint (quat. 4)
+            sensor.AddObservation(pendulumB.transform.rotation);
+            // (vec 3)
+            sensor.AddObservation(m_RbB.angularVelocity);
+            // (vec 3)
+            sensor.AddObservation(m_RbB.velocity);
+            // (vec 3) replaces active target coordinates in observations vector
+            target_observations = center + new Vector3(Random.Range(-size.x / 4, size.x / 4), Random.Range(-size.y / 4, size.y / 4), Random.Range(-size.z / 4, size.z / 4));
+            // Debug.Log("Intertrial interval observation vector" + target_observations);
+            sensor.AddObservation(target_observations);
+            // hand cooardiantes (vec 3)
+            sensor.AddObservation(hand.transform.localPosition); 
+            // vec (1) Goals are non-moving, therefore initalised with zeros
+            sensor.AddObservation(m_GoalSpeed);
+            // total number of params. in input vector = 33
 
-        sensor.AddObservation(pendulumB.transform.localPosition); // joint coordinates (vec 3)
-        sensor.AddObservation(pendulumB.transform.rotation); // rotation of joint (quat. 4)
-        sensor.AddObservation(m_RbB.angularVelocity); // (vec 3)
-        sensor.AddObservation(m_RbB.velocity); // (vec 3)
-
-        //sensor.AddObservation(goal.transform.localPosition); // goal coordnates (vec 3)
-		// Debug.Log(active.transform.parent);
-        // Debug.Log(active.transform.parent.localPosition); // print out input vec of active target
-        sensor.AddObservation(active.transform.parent.localPosition); // takes position of active target
-        sensor.AddObservation(hand.transform.localPosition); // hand cooardiantes (vec 3)
-
-        sensor.AddObservation(m_GoalSpeed); // (1)
-        // total number of params. in input vector = 33
+        }
+        // if the ITI is false use the regular observation vector including active target location 
+        else if (iti_active == false)
+        {
+            // joint coordinates (vec. 3)
+            sensor.AddObservation(pendulumA.transform.localPosition);
+            // rotation of joint (quat. 4)
+            sensor.AddObservation(pendulumA.transform.rotation);
+            // (vec 3)
+            sensor.AddObservation(m_RbA.angularVelocity);
+            // (vec 3)
+            sensor.AddObservation(m_RbA.velocity);
+            // joint coordinates (vec 3)
+            sensor.AddObservation(pendulumB.transform.localPosition);
+            // rotation of joint (quat. 4)
+            sensor.AddObservation(pendulumB.transform.rotation);
+            // (vec 3)
+            sensor.AddObservation(m_RbB.angularVelocity);
+            // (vec 3)
+            sensor.AddObservation(m_RbB.velocity);
+            // (vec 3) of target coordinates
+            // Debug.Log(iti_active);
+            target_observations = active.transform.parent.localPosition;
+            // Debug.Log("Regular observation vector" + target_observations);
+            sensor.AddObservation(target_observations);
+            // hand cooardiantes (vec 3)
+            sensor.AddObservation(hand.transform.localPosition);
+            // vec (1) Goals are non-moving, therefore initalised with zeros
+            sensor.AddObservation(m_GoalSpeed);
+            // total number of params. in input vector = 33
+        }
     }
 
     /// <summary>
@@ -100,8 +148,14 @@ public class ReacherAgent : Agent
     //    goal.transform.position = new Vector3(goalY, goalZ, goalX) + transform.position;
     //}
 
+    /// <summary>
+	/// Defines the intertrial interval in terms of time_steps for the duration an interval
+	/// denoted as time_step_interval. This interval is adjustable in the Unity environment
+	/// itself, however should be moves somewhere more visible. Currently it can be found
+	/// attached to the Agent. A more appropriate position would be the Game Manager.
+	/// <summary>
     private int time_steps = 0;
-   
+    public bool iti_active = false;
     IEnumerator WatchForEnoughSteps(int time_steps_interval)
     {
         while (time_steps < time_steps_interval)
@@ -109,21 +163,42 @@ public class ReacherAgent : Agent
             yield return null;
         }
         time_steps = 0;
+        iti_active = false;
     }
 
+    /// <summary>
+	/// Defines operations conducted each time step. Here we update the time_step counter for the
+	/// intertrial interval and randomly sample position within the agents reach to replace the
+	/// active target coordinates for when the inter trial interval is active. Replacement is necessary
+	/// for 2 reasons: 1) to ensure that the observations vector has the same length and suspended active
+	/// target coordinates are not padded to zero when the intertrial interval is active; 2) to add noise
+	/// to the experimental set up and see whether a centering strategy still emerges.
+    /// <summary>
     void Update()
     {
-        //Debug.Log(time_steps);
+        // time step counter
         time_steps++;
+        // Debug.Log(time_steps);
+        // Debug.Log("ITI 1"+iti_active);
+        // Debug.Log(target_observations);
+        // observation noise vector for when the intertrial interval is active
+        // Vector3 noise_observations = center + new Vector3(Random.Range(-size.x / 4, size.x / 4), Random.Range(-size.y / 4, size.y / 4), Random.Range(-size.z / 4, size.z / 4));
+        // Debug.Log(noise_observations);
+        // collect active target
         active = gameObject.transform.parent.GetComponent<Game_Manager>().getActive();
         if (GameManager.collision == true)
-        {
+        {   
             GameManager.collision = false;
-            StartCoroutine(WatchForEnoughSteps(100));
+            iti_active = true;
+            // Debug.Log("ITI 2"+iti_active);
+            // initalises the intertrial interval
+            time_steps = 0;
+            StartCoroutine(WatchForEnoughSteps(250));
+            // Debug.Log("ITI 3" + iti_active);
         }
         else
         {
-            //do nothing
+            // do nothing
         }
     }
     /// <summary>
@@ -142,7 +217,7 @@ public class ReacherAgent : Agent
         m_RbB.angularVelocity = Vector3.zero;
 
         m_GoalDegree = Random.Range(0, 360);
-        //UpdateGoalPosition();
+        // UpdateGoalPosition();
 
         SetResetParameters();
 
@@ -152,7 +227,7 @@ public class ReacherAgent : Agent
     public void SetResetParameters()
     {
         m_GoalSize = m_ResetParams.GetWithDefault("goal_size", 5);
-        //m_GoalSpeed = Random.Range(-1f, 1f) * m_ResetParams.GetWithDefault("goal_speed", 1);
+        // m_GoalSpeed = Random.Range(-1f, 1f) * m_ResetParams.GetWithDefault("goal_speed", 1);
         m_Deviation = m_ResetParams.GetWithDefault("deviation", 0);
         m_DeviationFreq = m_ResetParams.GetWithDefault("deviation_freq", 0);
     }

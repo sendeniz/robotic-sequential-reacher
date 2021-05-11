@@ -21,7 +21,9 @@ public class Game_Manager : MonoBehaviour
     public GameObject parent;
     public bool collision = false;
     public bool sequence_end = false;
-
+    public bool curriculum_learning = false;
+    public ReacherAgent Reacher_Agent;
+    
     void Start()
     {
     }
@@ -166,11 +168,21 @@ public class Game_Manager : MonoBehaviour
         setFirstActive();
     }
 
+    private int time_steps_c = 0;
     void Update()
     {
-        rewardToGive = rewardToGive * 0.99f;
-        rewardToGive = Math.Max(0.1f, rewardToGive);
-        float noise = Noise.gauss(0, 0.01);
+        // Debug.Log("Sensor ball location1:" + hand.transform.position);
+        // Debug.Log("Sensor ball location2:" + hand.transform.parent.position);
+        Vector3 target_pos = getActive().transform.parent.localPosition;
+        // Vector3 a = getActive().transform.position;
+        Vector3 sensor_pos = hand.transform.parent.localPosition;
+        // Vector3 b = hand.transform.position;
+        // Debug.Log("Target active locaiton:" + getActive().transform.parent.localPosition);
+        // Debug.Log("Sensor ball location3:" + hand.transform.parent.localPosition);
+        float diff_dist = Vector3.Distance(target_pos, sensor_pos);
+        // Debug.Log("Distance(Sensor,Active)" + diff_dist);
+        // Debug.Log(Distance(hand.transform.parent.localPosition, test));
+        // Debug.Log("Sensor ball location4:" + hand.transform.localPosition);
         // every frame find and collect Targets
         int c = 0;
         foreach (Transform child in parent.transform)
@@ -181,5 +193,33 @@ public class Game_Manager : MonoBehaviour
                 c++;
             }
         }
+        time_steps_c++;
+        // Debug.Log(time_steps_c);
+        if (curriculum_learning == false)
+        {
+            // Debug.Log("Regular learning active");
+            rewardToGive = rewardToGive * 0.9995f;
+            rewardToGive = Math.Max(0.5f, rewardToGive);
+        }
+
+        else if(curriculum_learning == true)
+        {
+            // Debug.Log("Curriculum learning active 1");
+            
+            if (time_steps_c >= 40000)
+            {
+                // Debug.Log("Regular learning active 2");
+                float dist_pen = diff_dist * -0.00001f;
+                rewardToGive = rewardToGive * 0.9995f + dist_pen;
+                rewardToGive = Math.Max(0.5f, rewardToGive);
+                // Debug.Log(dist_pen);
+            }
+            else
+            {
+                rewardToGive = rewardToGive * 0.9995f;
+                rewardToGive = Math.Max(0.5f, rewardToGive);
+            }
+        }
+
     }
 }
