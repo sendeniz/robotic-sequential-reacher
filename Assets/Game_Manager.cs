@@ -4,14 +4,16 @@ using UnityEngine;
 using System;
 using Random = UnityEngine.Random;
 
-
+/// <summary>
+/// gameObject[] defines an array of size 4 to collect target objects in.
+/// 4x4 matrix to initialize and determine activation status of targets, since we use
+/// Fisher-Yates Shuffle. 
+/// </summary>
 public class Game_Manager : MonoBehaviour
 {
     public GameObject agent;
     public GameObject hand;
-    // empty array of size 4 to collect target objects 
     public GameObject[] targetObjects = new GameObject[4];
-    // 4x4 matrix to initialize and determine activation status of targets
     Matrix4x4 sequence = new Matrix4x4();
     int gameSequence = 0;
     int failCounter = 0;
@@ -23,11 +25,18 @@ public class Game_Manager : MonoBehaviour
     public bool sequence_end = false;
     public bool curriculum_learning = false;
     public ReacherAgent Reacher_Agent;
-    
+    private int time_steps_c = 0;
+
     void Start()
     {
+
     }
-   
+
+    /// <summary>
+	/// Collects target objects at initialisation and Random_Gen_Target as parent of Agent
+	/// in agent.transform.parent = gameObject.transform. Furthermore, we setthe first target
+	/// in the shuffled identtiy matrix to active with setFirstActive().
+	/// <summary>
     public void init()
     {
         int c = 0;
@@ -42,10 +51,10 @@ public class Game_Manager : MonoBehaviour
 
         if (random_sequence == false)
         {
-            // set empty game object "Random_Gen_Target" as parent of Agent
+            
             agent.transform.parent = gameObject.transform;
             sequence = Matrix4x4.identity;
-            //sets the GoalOn Object of first sphere to Target Active
+            
             setFirstActive();
         }
         else if (random_sequence == true)
@@ -55,25 +64,29 @@ public class Game_Manager : MonoBehaviour
         }
     }
 
-    // Initialize First Target activation:
-    // Iterates over the first row and finds col i = 1
+    /// <summary>
+	/// Initalizes the first target activation and iterates by iteration over the first row.
+	/// Since the 1s in the identiy determine activationa dnt he identiy has been shuffeled
+	/// iterating over the first row and finding the column where i = 1 represents the
+	/// active target. If we find this target, the if condition is fulfilled and the object
+	/// is set to active.
+	/// <summary>
     private void setFirstActive()
     {
         for (int i = 0; i < 4; i++)
         {
             if (sequence[0, i] == 1)
             {
-                // if condition fulfilled, set target to active
                 targetObjects[i].transform.GetChild(0).gameObject.tag = "Active";
-                //targetObjects[i].transform.GetChild(1).name = "Active";
-                
                 temp = targetObjects[i].GetComponent<Renderer>().material.color;
                 targetObjects[i].GetComponent<Renderer>().material.color = new Color(224, 224, 224);
             }
         }
     }
 
-    // for each round check which target is active
+    /// <summary>
+    /// Defines a method which for each round of the game checks which target is active.
+    /// <summary>
     int checkActive(int round)
     {
         for (int j = 0; j < 4; j++)
@@ -85,7 +98,14 @@ public class Game_Manager : MonoBehaviour
         }
         return 0;
     }
-    
+
+    /// <summary>
+    /// Defines a method which checks touch or collision between the sensor and the target object
+	/// and manages the majority of the game, like initalizing a new round after the agent completed
+	/// a sucessfuly round, sets targets to active and unactive after collision or touch and also
+	/// manages the color of by setting the active target color to white and setting it back to
+	/// its native color. Here we also define the reward the agent obtains if the correct target has been touched.
+    /// <summary>
     public void triggered(GameObject touchedSphere)
     {
         // if more than than 1 target object 
@@ -94,7 +114,6 @@ public class Game_Manager : MonoBehaviour
             if (touchedSphere == targetObjects[checkActive(gameSequence)])
             {
                 collision = true;
-                // and reward if correct target has been touched
                 agent.GetComponent<ReacherAgent>().AddReward(rewardToGive);
                 Debug.Log("rewarded by " + rewardToGive);				
                 gameSequence++;
@@ -155,6 +174,9 @@ public class Game_Manager : MonoBehaviour
         return active_obj;
     }
 
+    /// <summary>
+    /// Defines a method to initalize a new random round and shuffes the identity matrix using Yates Fisher Shuffle.
+    /// <summary>
     private void initializeNewRound()
     {
         sequence = Matrix4x4.identity;
@@ -162,18 +184,29 @@ public class Game_Manager : MonoBehaviour
         setFirstActive();
     }
 
+    /// <summary>
+    /// Defines a method to a deterministic fixed sequence round.
+    /// <summary>
     private void initializeFixedRound()
     {
         sequence = Matrix4x4.identity;
         setFirstActive();
     }
 
-    private int time_steps_c = 0;
+    /// <summary>
+    /// Defines operations to be execute every timestep. Time steps are counted.
+	/// Collects target objects every timestep and defines the curriculum learning
+	/// schedule. Here we also govern the reward decay structure, which we reduce
+	/// by a factor of .995 and also add an additive displacement penality of -.001
+	/// for the second lesson in curriculim learning. The second lesson of the curriculum
+	/// learning starts after 400.000 timesteps which is equal to 100 epochs.
+    /// <summary>
     void Update()
     {
         Vector3 target_pos = getActive().transform.parent.localPosition;      
         Vector3 sensor_pos = hand.transform.parent.localPosition;
         float diff_dist = Vector3.Distance(target_pos, sensor_pos);
+
         // every frame find and collect Targets
         int c = 0;
         foreach (Transform child in parent.transform)
@@ -185,19 +218,15 @@ public class Game_Manager : MonoBehaviour
             }
         }
         time_steps_c++;
-        // Debug.Log(time_steps_c);
         if (curriculum_learning == false)
         {
-            // Debug.Log("Regular learning active");
             if (Reacher_Agent.iti_active == false)
             {
-                // Debug.Log("ITI not active 1");
                 rewardToGive = rewardToGive * 0.995f;
                 rewardToGive = Math.Max(0.5f, rewardToGive);
             }
             else if (Reacher_Agent.iti_active == true)
             {
-                // Debug.Log("ITI active 1");
                 rewardToGive = 1.0f;
             }
 
@@ -205,25 +234,19 @@ public class Game_Manager : MonoBehaviour
 
         else if(curriculum_learning == true)
         {
-            // Debug.Log("Curriculum learning active 1");
 
-            // if (time_steps_c >= 400000)
-            if (time_steps_c >= 10)
+            if (time_steps_c >= 400000)
             {
-                // Debug.Log("Curriculum learning active 2");
                 if (Reacher_Agent.iti_active == false)
                 {
-                    // Debug.Log("ITI not active 2");
-                    // Debug.Log("Regular learning active 2");
+
                     float dist_pen = diff_dist * -0.001f;
                     rewardToGive = rewardToGive * 0.995f + dist_pen;
                     rewardToGive = Math.Max(0.5f, rewardToGive);
-                    // Debug.Log(dist_pen);
                 }
 
                 else if (Reacher_Agent.iti_active == true)
                 {
-                    // Debug.Log("ITI active 2");
                     rewardToGive = 1.0f;
                 }
 
@@ -232,14 +255,12 @@ public class Game_Manager : MonoBehaviour
             {
                 if (Reacher_Agent.iti_active == false)
                 {
-                    // Debug.Log("ITI note active 3");
                     rewardToGive = rewardToGive * 0.995f;
                     rewardToGive = Math.Max(0.5f, rewardToGive);
                 }
 
                 else if (Reacher_Agent.iti_active == true)
                 {
-                    // Debug.Log("ITI active 3");
                     rewardToGive = 1.0f;
                 }
                 

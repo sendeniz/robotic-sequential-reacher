@@ -2,42 +2,42 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
+/// <summary>
+/// Define gameobject targetobj to be selected in the unity UI.
+/// We use this target to clone it n number of times, with n = int numTargets = 3
+/// totalling to 1 original + 3 cloned targets.
+/// The gameobject goal is the green target sphere, which we clone.
+/// The random location parameter is a boolen to be set true or false in the UI
+/// and determines whether all target objects will initalize at a random location
+/// within the reach of the reacher agent.
+/// The vector center is the center location of the agent and size determines the
+/// radial dimension of where targets will be randomly located if random location is
+/// set to true. 
+/// </summary>
 public class Gen_Target : MonoBehaviour
 {
-    // defines a  Gameobject "Targetprefab" to be selected in the Unity envir.
-    // that is to be generated/cloned n number of times (see int numTargets=3)
     public GameObject Targetobj;
     public Game_Manager GameManager;
-    // defines a Gameobject "goal", which is the initial green goal object in the ML agents reacher example
     public GameObject goal;
     public GameObject agent;
-    // defines the condition whether target generation is at random locations or fixed to be select in Unity envir.
     public bool random_location = false;
     public GameObject parent;
     public GameObject[] targetObjects = new GameObject[4];
-
-    // define two vectors of size 3 to store x,y,z coordinates, centered and sized
-    // according to the size of the empty game object, which defines all possible
-    // location in 3D space for 4 targets to spawn randomly
-    // center used to determine middle point of the 3D cubic spawning area
-
     private Vector3 center;
     public Vector3 size;
-
-    //private Vector3 test;
-
-    // Defines parameters for targets, since we start with 1 inital target, if
-    // total number of targets desired is 4, numTargets = 3 new targets + 1 initial target = 4 total
     int numTargets = 3;
     int i = 0;
 
     void Start()
     {
-        //center = transform.Find("Agent").transform.position;
-        //Debug.Log("The center Agent Location:" + center);
+
     }
 
+    /// <summary>
+	/// Initialization method, which either 1) initialized targets at random
+	/// location within the spheric reach of the agent or 2) at a fixed position equidistant to
+	/// the reacher agent. 
+    /// </summary>
     public void init()
     {
 
@@ -60,7 +60,14 @@ public class Gen_Target : MonoBehaviour
         }
     }
 
-    // define a color map for targets
+
+    /// <summary>
+    /// Defines the color of each cloned target and spawn targets either at a fixed or random location.
+	/// Compared to the above method, which is only called at the initialisaiton phase, this method
+	/// is called later on as well to randomize location after a sucessfully round (i.e., all targets
+	/// have been toucehd in the correct order). We take the center of the agent and randomize location
+	/// based on x,y,z coordinates within the agents reach. 
+    /// </summary>
     Color[] colors = { Color.yellow, Color.blue, Color.red };
     string[] colorNames = { "Yellow", "Blue", "Red" };
 
@@ -69,60 +76,53 @@ public class Gen_Target : MonoBehaviour
         if (random_location == true)
         {
             center = transform.Find("Agent").transform.position;
-            // takes center of empty square game object, plus minus max ranged divided 2 for x,y,z to generate
-            // numTargets within the space at random location
             Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
             GameObject newObject = Instantiate(Targetobj, pos, Quaternion.identity);
-            // newObject sets parent to parent of Targetobj
             newObject.transform.parent = Targetobj.transform.parent;
-            // assignes tag = "Target" for each generated target
             newObject.tag = "Target";
-            // change color of Targets
             newObject.GetComponent<Renderer>().material.color = colors[i];
             newObject.transform.name = colorNames[i];
         }
         else if (random_location == false)
         {
-            // takes center of empty square game object, plus minus max ranged divided 2 for x,y,z to generate
-            // numTargets within the space at random location
-            // Vector3 pos = center + new Vector3((size.x / 2 )+i, (size.y / 2)+i, (size.z / 2)+i);
             Vector3 pos = new Vector3(8.5f + agent.transform.position.x, -3.1f + agent.transform.position.y, 0.9f + agent.transform.position.z);
             switch (i)
             {
                 case 0:
                     pos = new Vector3(-8.5f + agent.transform.position.x, -3.1f + agent.transform.position.y, 0.9f + agent.transform.position.z);
-                    //pos = center + new Vector3(-8 , 0, 0);
                     break;
                 case 1:
-                    //pos = center + new Vector3(0, 0, -12 );
                     pos = new Vector3(0 + agent.transform.position.x, -3.1f + agent.transform.position.y, -8.5f + agent.transform.position.z);
                     break;
                 case 2:
-                    //pos = center + new Vector3(0 , 0, 12);
                     pos = new Vector3(0 + agent.transform.position.x, -3.1f + agent.transform.position.y, 8.5f + agent.transform.position.z);
                     break;
             }
-            //Vector3 pos = center + new Vector3(8+i, -3, 1+i);
+            
             GameObject newObject = Instantiate(Targetobj, pos, Quaternion.identity);
-            // newObject sets parent to parent of Targetobj
             newObject.transform.parent = Targetobj.transform.parent;
-            // assignes tag = "Target" for each generated target
             newObject.tag = "Target";
-            // change color of Targets
             newObject.GetComponent<Renderer>().material.color = colors[i];
             newObject.transform.name = colorNames[i];
         }
     }
 
-    // Defines color, cube object form of the empty game object
+    /// <summary>
+    /// Defines a translucent red sphere around the agent, which represents its reaching space
+	/// and the space in which targets can be randomly allocated within if rando location is set true.
+    /// </summary>
     void OnDrawGizmosSelected()
     {
         center = transform.Find("Agent").transform.position;
         Gizmos.color = new Color(1, 0, 0, 0.5f);
-        //Gizmos.DrawCube(center, size);
         Gizmos.DrawSphere(center, 14);
     }
 
+    /// <summary>
+    /// Defines operations to be done every timestep or frame. Collects all target location with respect
+	/// to its parent to ensure that target objects are not searched globally but only
+	/// within its own parent. 
+    /// </summary>
     void Update()
     {
         center = transform.Find("Agent").transform.position;
@@ -143,24 +143,10 @@ public class Gen_Target : MonoBehaviour
                 {
                     center = transform.Find("Agent").transform.position;
                     Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
-                    //Vector3 pos = pos = new Vector3(0 + agent.transform.position.x, -3.1f + agent.transform.position.y, 8.5f + agent.transform.position.z);
                     targetObjects[i].transform.position = pos;
                     GameManager.sequence_end = false;
                 }
-
-                //else if (random_location == false)
-                //{
-                    //center = transform.Find("Agent").transform.position;
-                    //Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
-                //    Vector3 pos = pos = new Vector3(0 + agent.transform.position.x, -3.1f + agent.transform.position.y, 8.5f + agent.transform.position.z);
-                //    targetObjects[i].transform.position = pos;
-                //    GameManager.sequence_end = false;
-                //}
             }
-            
-            //Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
-            //goal.transform.position = pos;
-            //GameManager.sequence_end = false;
         }
     }
 }
