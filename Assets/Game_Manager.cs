@@ -171,18 +171,9 @@ public class Game_Manager : MonoBehaviour
     private int time_steps_c = 0;
     void Update()
     {
-        // Debug.Log("Sensor ball location1:" + hand.transform.position);
-        // Debug.Log("Sensor ball location2:" + hand.transform.parent.position);
-        Vector3 target_pos = getActive().transform.parent.localPosition;
-        // Vector3 a = getActive().transform.position;
+        Vector3 target_pos = getActive().transform.parent.localPosition;      
         Vector3 sensor_pos = hand.transform.parent.localPosition;
-        // Vector3 b = hand.transform.position;
-        // Debug.Log("Target active locaiton:" + getActive().transform.parent.localPosition);
-        // Debug.Log("Sensor ball location3:" + hand.transform.parent.localPosition);
         float diff_dist = Vector3.Distance(target_pos, sensor_pos);
-        // Debug.Log("Distance(Sensor,Active)" + diff_dist);
-        // Debug.Log(Distance(hand.transform.parent.localPosition, test));
-        // Debug.Log("Sensor ball location4:" + hand.transform.localPosition);
         // every frame find and collect Targets
         int c = 0;
         foreach (Transform child in parent.transform)
@@ -198,28 +189,61 @@ public class Game_Manager : MonoBehaviour
         if (curriculum_learning == false)
         {
             // Debug.Log("Regular learning active");
-            rewardToGive = rewardToGive * 0.9995f;
-            rewardToGive = Math.Max(0.5f, rewardToGive);
+            if (Reacher_Agent.iti_active == false)
+            {
+                // Debug.Log("ITI not active 1");
+                rewardToGive = rewardToGive * 0.995f;
+                rewardToGive = Math.Max(0.5f, rewardToGive);
+            }
+            else if (Reacher_Agent.iti_active == true)
+            {
+                // Debug.Log("ITI active 1");
+                rewardToGive = 1.0f;
+            }
+
         }
 
         else if(curriculum_learning == true)
         {
             // Debug.Log("Curriculum learning active 1");
-            
-            if (time_steps_c >= 40000)
+
+            // if (time_steps_c >= 400000)
+            if (time_steps_c >= 10)
             {
-                // Debug.Log("Regular learning active 2");
-                float dist_pen = diff_dist * -0.00001f;
-                rewardToGive = rewardToGive * 0.9995f + dist_pen;
-                rewardToGive = Math.Max(0.5f, rewardToGive);
-                // Debug.Log(dist_pen);
+                // Debug.Log("Curriculum learning active 2");
+                if (Reacher_Agent.iti_active == false)
+                {
+                    // Debug.Log("ITI not active 2");
+                    // Debug.Log("Regular learning active 2");
+                    float dist_pen = diff_dist * -0.001f;
+                    rewardToGive = rewardToGive * 0.995f + dist_pen;
+                    rewardToGive = Math.Max(0.5f, rewardToGive);
+                    // Debug.Log(dist_pen);
+                }
+
+                else if (Reacher_Agent.iti_active == true)
+                {
+                    // Debug.Log("ITI active 2");
+                    rewardToGive = 1.0f;
+                }
+
             }
             else
             {
-                rewardToGive = rewardToGive * 0.9995f;
-                rewardToGive = Math.Max(0.5f, rewardToGive);
+                if (Reacher_Agent.iti_active == false)
+                {
+                    // Debug.Log("ITI note active 3");
+                    rewardToGive = rewardToGive * 0.995f;
+                    rewardToGive = Math.Max(0.5f, rewardToGive);
+                }
+
+                else if (Reacher_Agent.iti_active == true)
+                {
+                    // Debug.Log("ITI active 3");
+                    rewardToGive = 1.0f;
+                }
+                
             }
         }
-
     }
 }

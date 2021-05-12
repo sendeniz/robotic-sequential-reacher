@@ -26,6 +26,7 @@ public class ReacherAgent : Agent
     private Vector3 size = new Vector3(14,14,14);
     private Vector3 center;
     private Vector3 target_observations;
+    public bool iti_active = false;
 
     EnvironmentParameters m_ResetParams;
 
@@ -77,7 +78,7 @@ public class ReacherAgent : Agent
             // (vec 3)
             sensor.AddObservation(m_RbB.velocity);
             // (vec 3) replaces active target coordinates in observations vector
-            target_observations = center + new Vector3(Random.Range(-size.x / 4, size.x / 4), Random.Range(-size.y / 4, size.y / 4), Random.Range(-size.z / 4, size.z / 4));
+            target_observations = center + new Vector3(Random.Range(-size.x / 6, size.x / 6), Random.Range(-size.y / 6, size.y / 6), Random.Range(-size.z / 6, size.z / 6));
             // Debug.Log("Intertrial interval observation vector" + target_observations);
             sensor.AddObservation(target_observations);
             // hand cooardiantes (vec 3)
@@ -155,7 +156,6 @@ public class ReacherAgent : Agent
 	/// attached to the Agent. A more appropriate position would be the Game Manager.
 	/// <summary>
     private int time_steps = 0;
-    public bool iti_active = false;
     IEnumerator WatchForEnoughSteps(int time_steps_interval)
     {
         while (time_steps < time_steps_interval)
