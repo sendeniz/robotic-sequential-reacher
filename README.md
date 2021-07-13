@@ -1,4 +1,4 @@
-# RL_SRT
+# Robotic sequential reacher
  
 General:
 The interaction with the Unity environment itself is conducted via c# scripts. As all physic simulation operations are implemented
