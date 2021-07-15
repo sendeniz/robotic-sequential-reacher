@@ -1,7 +1,7 @@
 # Robotic sequential reacher
  
 General:
-A fully articulated robotic arm controller solving a sequential reaching task akin to a serial reaction time task, allowing close comparison of different learning algortihmns such as PPO, SAC, Q-learning etc. with human behavior on the same task.
+A fully articulated robotic arm controller solving a sequential reaching task akin to a serial reaction time task, allowing close comparison of different learning algortihmns such as PPO, SAC, Q-learning etc. with human behavior on the same task. Agents are trained in parallel to each other within the same environment as shown below, to speed up training and reduce randomness, when examining performance metrics.
 
 <p align="center">
   <img width="460" height="300" src=/figs/train_env.png?raw=true "Training Environment">
