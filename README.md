@@ -2,7 +2,7 @@
  
 General:
 A fully articulated robotic arm controller solving a sequential reaching task akin to a serial reaction time task, allowing close comparison of different learning algortihmns such as PPO, SAC, Q-learning etc. with human behavior on the same task. 
-![Alt text](sendeniz/robotic-sequential-reacher/figs/train_env.png?raw=true "Optional Title")
+![Training Environment](sendeniz/robotic-sequential-reacher/figs/train_env.png?raw=true "Optional Title")
 
 C# scrips: 
 "Game_Manager.cs" : manages properties of the game. Target activation sequence, successful reaching to an active target, reward giving and curriculum learning are defined here. If desired random activation can be disable which will result in a deterministic activation sequence in the Unity environment's UI. 
