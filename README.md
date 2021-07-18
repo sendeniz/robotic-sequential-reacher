@@ -5,17 +5,19 @@ This repo contains a fully articulated robotic arm controller solving a sequenti
 
 <p align="center">
   <img width="460" height="300" src=/figs/train_env.png?raw=true "Training Environment">
+	<figcaption>Fig.1 - Training environment.</figcaption>
 </p>
 
 The target actication sequence can either be 1) a self repeating deterministic sequence or a 2) random activation sequence without repitions.  Comparisong between the two sequences shows that a self repeating sequence results in a circular movement trajectory over the targets to optimize reward, while a random sequence results in an optmimization strategy in which the agents centers its hand sensor location equidistant to all 4 targets as it is unable to predict the targets next location. 
 
 <p align="center">
-  <img width="460" height="300" src=/figs/fixed_active_scatter.png?raw=true "Fixed Sequence" title=Fixed sequence 3D point clouds PPO >
-	<figcaption>Optional title</figcaption>
+  <img width="460" height="300" src=/figs/fixed_active_scatter.png?raw=true "Fixed Sequence">
+	<figcaption>Fig.2 - Fixed sequence 3D point clouds PPO.</figcaption>
 </p>
 
 <p align="center">
-  <img width="460" height="300" src=/figs/random_active_scatter.png?raw=true "Random Sequence" title=Random sequence 3D point clouds PPO >
+  <img width="460" height="300" src=/figs/random_active_scatter.png?raw=true "Random Sequence">
+	<figcaption>Fig.3 - Random sequence 3D point clouds PPO.</figcaption>
 </p>
 
 
