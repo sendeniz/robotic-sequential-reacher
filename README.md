@@ -9,7 +9,7 @@ This repo contains a fully articulated robotic arm controller solving a sequenti
 	<figcaption>Fig.1 - Training environment.</figcaption>
 </p>
 
-The target actication sequence can either be 1) a self repeating deterministic sequence or a 2) random activation sequence without repitions.  Comparisong between the two sequences shows that a self repeating sequence results in a circular movement trajectory over the targets to optimize reward, while a random sequence results in an optmimization strategy in which the agents centers itself equidistant to all 4 targets as it is unable to predict the targets next location.
+The target activation sequence can either be 1) a self repeating deterministic sequence or a 2) random activation sequence without repitions.  Comparisong between the two sequences shows that a self repeating sequence results in a circular movement trajectory over the targets to optimize reward, while a random sequence results in an optmimization strategy in which the agents centers itself equidistant to all 4 targets as it is unable to predict the targets next location.
 
 <p align="center">
   <img width="560" height="300" src=/figs/fixed_active_scatter.png?raw=true "Fixed Sequence">
