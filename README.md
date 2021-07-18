@@ -1,6 +1,7 @@
 # Robotic sequential reacher
  
-General:
+**General:**
+<br>
 This repo contains a fully articulated robotic arm controller solving a sequential reaching task akin to a serial reaction time task, allowing close comparison of different learning algortihmns such as PPO, SAC, Q-learning etc. with human behavior on the same task. Agents are trained in parallel to each other within the same environment as shown below, to speed up training and reduce randomness, when examining performance metrics.
 
 <p align="center">
@@ -11,18 +12,19 @@ This repo contains a fully articulated robotic arm controller solving a sequenti
 The target actication sequence can either be 1) a self repeating deterministic sequence or a 2) random activation sequence without repitions.  Comparisong between the two sequences shows that a self repeating sequence results in a circular movement trajectory over the targets to optimize reward, while a random sequence results in an optmimization strategy in which the agents centers itself equidistant to all 4 targets as it is unable to predict the targets next location.
 
 <p align="center">
-  <img width="460" height="320" src=/figs/fixed_active_scatter.png?raw=true "Fixed Sequence">
+  <img width="560" height="300" src=/figs/fixed_active_scatter.png?raw=true "Fixed Sequence">
 	<figcaption>Fig.2 - Fixed sequence 3D point clouds PPO.</figcaption>
 </p>
 
 <p align="center">
-  <img width="460" height="320" src=/figs/random_active_scatter.png?raw=true "Random Sequence">
+  <img width="560" height="300" src=/figs/random_active_scatter.png?raw=true "Random Sequence">
 	<figcaption>Fig.3 - Random sequence 3D point clouds PPO.</figcaption>
 </p>
 
 
 
-C# scrips: 
+**C# scrips:**
+<br>
 "Game_Manager.cs" : manages properties of the game. Target activation sequence, successful reaching to an active target, reward giving and curriculum learning are defined here. If desired random activation can be disable which will result in a deterministic activation sequence in the Unity environment's UI. 
 Curriculum learning can as well be disable or enabled in the environment's UI.
 	
