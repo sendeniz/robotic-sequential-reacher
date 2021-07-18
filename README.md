@@ -1,11 +1,23 @@
 # Robotic sequential reacher
  
 General:
-A fully articulated robotic arm controller solving a sequential reaching task akin to a serial reaction time task, allowing close comparison of different learning algortihmns such as PPO, SAC, Q-learning etc. with human behavior on the same task. Agents are trained in parallel to each other within the same environment as shown below, to speed up training and reduce randomness, when examining performance metrics.
+This repo contains a fully articulated robotic arm controller solving a sequential reaching task akin to a serial reaction time task, allowing close comparison of different learning algortihmns such as PPO, SAC, Q-learning etc. with human behavior on the same task. Agents are trained in parallel to each other within the same environment as shown below, to speed up training and reduce randomness, when examining performance metrics.
 
 <p align="center">
   <img width="460" height="300" src=/figs/train_env.png?raw=true "Training Environment">
 </p>
+
+The target actication sequence can either be 1) a self repeating deterministic sequence or a 2) random activation sequence without repitions.  Comparisong between the two sequences shows that a self repeating sequence results in a circular movement trajectory over the targets to optimize reward, while a random sequence results in an optmimization strategy in which the agents centers its hand sensor location equidistant to all 4 targets as it is unable to predict the targets next location. 
+
+<p align="center">
+  <img width="460" height="300" src=/figs/fixed_active_scatter.png?raw=true "Training Environment">
+</p>
+
+<p align="center">
+  <img width="460" height="300" src=/figs/random_active_scatter.png?raw=true "Training Environment">
+</p>
+
+
 
 C# scrips: 
 "Game_Manager.cs" : manages properties of the game. Target activation sequence, successful reaching to an active target, reward giving and curriculum learning are defined here. If desired random activation can be disable which will result in a deterministic activation sequence in the Unity environment's UI. 
