@@ -17,15 +17,19 @@ public class Game_Manager : MonoBehaviour
     Matrix4x4 sequence = new Matrix4x4();
     int gameSequence = 0;
     int failCounter = 0;
-    public bool random_sequence = false;
+    public bool RandomSequence = false;
     Color temp;
     float rewardToGive = 1;
     public GameObject parent;
     public bool collision = false;
-    public bool sequence_end = false;
-    public bool curriculum_learning = false;
+    public bool SequenceEnd = false;
+    public bool UseCurriculum = false;
     public ReacherAgent Reacher_Agent;
     private int time_steps_c = 0;
+    public float DecayFactor;
+    public float DisplacementFactor;
+    public float minReward;
+    public int StartCurriculumAfterTimestep;
 
     void Start()
     {
@@ -49,7 +53,7 @@ public class Game_Manager : MonoBehaviour
             }
         }
 
-        if (random_sequence == false)
+        if (RandomSequence == false)
         {
             
             agent.transform.parent = gameObject.transform;
@@ -57,7 +61,7 @@ public class Game_Manager : MonoBehaviour
             
             setFirstActive();
         }
-        else if (random_sequence == true)
+        else if (RandomSequence == true)
         {
             sequence = Yates.Shuffle(Matrix4x4.identity);
             setFirstActive();
@@ -127,12 +131,12 @@ public class Game_Manager : MonoBehaviour
                 {
                     gameSequence = 0;
                     failCounter = 0;
-                    sequence_end = true;
-                    if (random_sequence == false)
+                    SequenceEnd = true;
+                    if (RandomSequence == false)
                     {
                         initializeFixedRound();
                     }
-                    else if (random_sequence == true)
+                    else if (RandomSequence == true)
                     {
                         initializeNewRound();
                     }
@@ -218,34 +222,38 @@ public class Game_Manager : MonoBehaviour
             }
         }
         time_steps_c++;
-        if (curriculum_learning == false)
+        if (UseCurriculum == false)
         {
-            if (Reacher_Agent.iti_active == false)
+            if (Reacher_Agent.ItiActive == false)
             {
-                rewardToGive = rewardToGive * 0.995f;
-                rewardToGive = Math.Max(0.5f, rewardToGive);
+                //rewardToGive = rewardToGive * 0.995f;
+                rewardToGive = rewardToGive * DecayFactor;
+                rewardToGive = Math.Max(minReward, rewardToGive);
             }
-            else if (Reacher_Agent.iti_active == true)
+            else if (Reacher_Agent.ItiActive == true)
             {
                 rewardToGive = 1.0f;
             }
 
         }
 
-        else if(curriculum_learning == true)
+        else if(UseCurriculum == true)
         {
 
-            if (time_steps_c >= 400000)
+            //if (time_steps_c >= 400000)
+            if (time_steps_c >= StartCurriculumAfterTimestep)
             {
-                if (Reacher_Agent.iti_active == false)
+                if (Reacher_Agent.ItiActive == false)
                 {
 
-                    float dist_pen = diff_dist * -0.001f;
-                    rewardToGive = rewardToGive * 0.995f + dist_pen;
-                    rewardToGive = Math.Max(0.5f, rewardToGive);
+                    // float dist_pen = diff_dist * -0.001f;
+                    float dist_pen = diff_dist * DisplacementFactor;
+                    // rewardToGive = rewardToGive * 0.995f + dist_pen;
+                    rewardToGive = rewardToGive * DecayFactor + dist_pen;
+                    rewardToGive = Math.Max(minReward, rewardToGive);
                 }
 
-                else if (Reacher_Agent.iti_active == true)
+                else if (Reacher_Agent.ItiActive == true)
                 {
                     rewardToGive = 1.0f;
                 }
@@ -253,13 +261,14 @@ public class Game_Manager : MonoBehaviour
             }
             else
             {
-                if (Reacher_Agent.iti_active == false)
+                if (Reacher_Agent.ItiActive == false)
                 {
-                    rewardToGive = rewardToGive * 0.995f;
-                    rewardToGive = Math.Max(0.5f, rewardToGive);
+                    // rewardToGive = rewardToGive * 0.995f;
+                    rewardToGive = rewardToGive * DecayFactor;
+                    rewardToGive = Math.Max(minReward, rewardToGive);
                 }
 
-                else if (Reacher_Agent.iti_active == true)
+                else if (Reacher_Agent.ItiActive == true)
                 {
                     rewardToGive = 1.0f;
                 }

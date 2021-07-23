@@ -20,7 +20,7 @@ public class Gen_Target : MonoBehaviour
     public Game_Manager GameManager;
     public GameObject goal;
     public GameObject agent;
-    public bool random_location = false;
+    public bool RandomLocation = false;
     public GameObject parent;
     public GameObject[] targetObjects = new GameObject[4];
     private Vector3 center;
@@ -40,15 +40,14 @@ public class Gen_Target : MonoBehaviour
     /// </summary>
     public void init()
     {
-
-        if (random_location == true)
+        if (RandomLocation == true)
         {
             center = transform.Find("Agent").transform.position;
             //randomize location of initial goal/target object
             Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
             goal.transform.position = pos;
         }
-        else if (random_location == false)
+        else if (RandomLocation == false)
         {
             Vector3 pos = new Vector3(8.5f + agent.transform.position.x, -3.1f + agent.transform.position.y, 0.9f + agent.transform.position.z);
         }
@@ -73,7 +72,7 @@ public class Gen_Target : MonoBehaviour
 
     public void SpawnTarget(int i)
     {
-        if (random_location == true)
+        if (RandomLocation == true)
         {
             center = transform.Find("Agent").transform.position;
             Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
@@ -83,7 +82,7 @@ public class Gen_Target : MonoBehaviour
             newObject.GetComponent<Renderer>().material.color = colors[i];
             newObject.transform.name = colorNames[i];
         }
-        else if (random_location == false)
+        else if (RandomLocation == false)
         {
             Vector3 pos = new Vector3(8.5f + agent.transform.position.x, -3.1f + agent.transform.position.y, 0.9f + agent.transform.position.z);
             switch (i)
@@ -126,7 +125,7 @@ public class Gen_Target : MonoBehaviour
     void Update()
     {
         center = transform.Find("Agent").transform.position;
-        if (GameManager.sequence_end == true)
+        if (GameManager.SequenceEnd == true)
         {
             int c = 0;
             foreach (Transform child in parent.transform)
@@ -139,12 +138,12 @@ public class Gen_Target : MonoBehaviour
             }
             for (int i = 0; i < 4; i++)
             {
-                if (random_location == true)
+                if (RandomLocation == true)
                 {
                     center = transform.Find("Agent").transform.position;
                     Vector3 pos = center + new Vector3(Random.Range(-size.x / 2, size.x / 2), Random.Range(-size.y / 2, size.y / 2), Random.Range(-size.z / 2, size.z / 2));
                     targetObjects[i].transform.position = pos;
-                    GameManager.sequence_end = false;
+                    GameManager.SequenceEnd = false;
                 }
             }
         }

@@ -26,7 +26,8 @@ public class ReacherAgent : Agent
     private Vector3 size = new Vector3(14,14,14);
     private Vector3 center;
     private Vector3 target_observations;
-    public bool iti_active = false;
+    public bool ItiActive = false;
+    public int IntertrialIntervalDuration;
 
     EnvironmentParameters m_ResetParams;
 
@@ -59,7 +60,7 @@ public class ReacherAgent : Agent
     public override void CollectObservations(VectorSensor sensor)
     {
         // if the ITI is active suspend the active target observation vector
-        if (iti_active == true)
+        if (ItiActive == true)
         {
             // joint coordinates (vec. 3)
             sensor.AddObservation(pendulumA.transform.localPosition);
@@ -89,7 +90,7 @@ public class ReacherAgent : Agent
 
         }
         // if the ITI is false use the regular observation vector including active target location 
-        else if (iti_active == false)
+        else if (ItiActive == false)
         {
             // joint coordinates (vec. 3)
             sensor.AddObservation(pendulumA.transform.localPosition);
@@ -108,7 +109,7 @@ public class ReacherAgent : Agent
             // (vec 3)
             sensor.AddObservation(m_RbB.velocity);
             // (vec 3) of target coordinates
-            // Debug.Log(iti_active);
+            // Debug.Log(ItiActive);
             target_observations = active.transform.parent.localPosition;
             // Debug.Log("Regular observation vector" + target_observations);
             sensor.AddObservation(target_observations);
@@ -163,7 +164,7 @@ public class ReacherAgent : Agent
             yield return null;
         }
         time_steps = 0;
-        iti_active = false;
+        ItiActive = false;
     }
 
     /// <summary>
@@ -179,7 +180,7 @@ public class ReacherAgent : Agent
         // time step counter
         time_steps++;
         // Debug.Log(time_steps);
-        // Debug.Log("ITI 1"+iti_active);
+        // Debug.Log("ITI 1"+ItiActive);
         // Debug.Log(target_observations);
         // observation noise vector for when the intertrial interval is active
         // Vector3 noise_observations = center + new Vector3(Random.Range(-size.x / 4, size.x / 4), Random.Range(-size.y / 4, size.y / 4), Random.Range(-size.z / 4, size.z / 4));
@@ -189,12 +190,12 @@ public class ReacherAgent : Agent
         if (GameManager.collision == true)
         {   
             GameManager.collision = false;
-            iti_active = true;
-            // Debug.Log("ITI 2"+iti_active);
+            ItiActive = true;
+            // Debug.Log("ITI 2"+ItiActive);
             // initalises the intertrial interval
             time_steps = 0;
-            StartCoroutine(WatchForEnoughSteps(250));
-            // Debug.Log("ITI 3" + iti_active);
+            StartCoroutine(WatchForEnoughSteps(IntertrialIntervalDuration));
+            // Debug.Log("ITI 3" + ItiActive);
         }
         else
         {
