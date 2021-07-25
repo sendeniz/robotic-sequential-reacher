@@ -438,7 +438,7 @@ MonoBehaviour:
   - {fileID: 0}
   - {fileID: 0}
   - {fileID: 0}
-  RandomSequence: 1
+  RandomSequence: 0
   parent: {fileID: 1395681985517323}
   collision: 0
   SequenceEnd: 0
