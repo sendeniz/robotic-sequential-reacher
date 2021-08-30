@@ -40,7 +40,14 @@ done
 
 Note that the **.yaml** file contains all hyperparameters for training.
 
+Given that you have created your own build "**your_build_no_1**" and want to initiate training, start your concole, 1. activate your virtual environment, 2. go to your project folder, 3. ensure your shell file **your_shell_file.sh** callable and begin training by calling your shell file **your_shell_file.sh** as:
 
+```
+1. conda activate //anaconda3/envs/UnityML
+2. cd /Users/last_name/project_location
+3. chmod +x your_shell_file.sh
+4. ./your_shell_file.sh
+```
 
 **C# scrips:**
 <br>
