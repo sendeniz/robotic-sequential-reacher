@@ -21,6 +21,25 @@ The target activation sequence can either be 1) a self repeating deterministic s
 	<figcaption>Fig.3 - Random sequence 3D point clouds PPO.</figcaption>
 </p>
 
+**Training:**
+<br>
+To train and replicate results it is recommended to 1) create your own executable build within the Unity environment via the "**File/Build Setting**" tab and 2) create a corresponding shell "**.shl**" file to train from scratch. Please select the corresponding target platform you wish to run the executable one. An example for a shell file to train PPO is given below: 
+
+```
+your_shell_file.sh
+```
+
+```
+#!/bin/bash
+for i in {1..3}
+do
+   echo "Starting run $i"
+   mlagents-learn config/ppo/Reacher.yaml --base-port 38278 --no-graphics --env=Project/Builds/your_build_no_1 --run-id=your_build_no_1_run-"$i"
+done
+```
+
+Note that the **.yaml** file contains all hyperparameters for training.
+
 
 
 **C# scrips:**
