@@ -37,7 +37,6 @@ do
    mlagents-learn config/ppo/Reacher.yaml --base-port 38278 --no-graphics --env=Project/Builds/your_build_no_1 --run-id=your_build_no_1_run-"$i"
 done
 ```
-
 Note that the **.yaml** file contains all hyperparameters for training.
 
 Given that you have created your own build "**your_build_no_1**" and want to initiate training, start your concole, 1. activate your virtual environment, 2. go to your project folder, 3. ensure your shell file **your_shell_file.sh** callable and begin training by calling your shell file **your_shell_file.sh** as:
@@ -48,6 +47,7 @@ Given that you have created your own build "**your_build_no_1**" and want to ini
 3. chmod +x your_shell_file.sh
 4. ./your_shell_file.sh
 ```
+Note that for windows or linux the execution procedure may differ as this was tested on a mac os. 
 
 **C# scrips:**
 <br>
