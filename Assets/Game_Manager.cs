@@ -30,10 +30,17 @@ public class Game_Manager : MonoBehaviour
     public float DisplacementFactor;
     public float minReward;
     public int StartCurriculumAfterTimestep;
+    public int delayBetweenTargets = 250;
 
+    public bool isWaiting;
+
+    public int timer;
+
+
+    private GameObject touchedSphere;
     void Start()
     {
-
+        timer = delayBetweenTargets;
     }
 
     /// <summary>
@@ -110,57 +117,16 @@ public class Game_Manager : MonoBehaviour
 	/// manages the color of by setting the active target color to white and setting it back to
 	/// its native color. Here we also define the reward the agent obtains if the correct target has been touched.
     /// <summary>
-    public void triggered(GameObject touchedSphere)
+    public void triggered(GameObject sphere)
     {
-        // if more than than 1 target object 
-        if (targetObjects.Length > 1)
+        //print("hit");
+        touchedSphere = sphere;
+        //timer = 0;
+        if (touchedSphere == targetObjects[checkActive(gameSequence)])
         {
-            if (touchedSphere == targetObjects[checkActive(gameSequence)])
+            if(timer == -1) // if higher than delay time set timer to zero
             {
-                collision = true;
-                agent.GetComponent<ReacherAgent>().AddReward(rewardToGive);
-                //Debug.Log("rewarded by " + rewardToGive);				
-                gameSequence++;
-                rewardToGive = 1.0f;
-                failCounter = 0;
-                // sets the tag of GoalOn objct of the touchedSphere to Untagged
-                touchedSphere.transform.GetChild(0).gameObject.tag = "Untagged";
-                // set the color of the target back to its original
-                touchedSphere.GetComponent<Renderer>().material.color = temp;
-                if (gameSequence > 3)
-                {
-                    gameSequence = 0;
-                    failCounter = 0;
-                    SequenceEnd = true;
-                    if (RandomSequence == false)
-                    {
-                        initializeFixedRound();
-                        SequenceEnd = false;
-                        gameSequence = 0;
-                    }
-                    else if (RandomSequence == true)
-                    {
-                        initializeNewRound();
-                        SequenceEnd = false;
-                        gameSequence = 0;
-                    }
-                }
-                else
-                {
-                    int active = checkActive(gameSequence);
-                    // sets the tag of the next balls GoalOn objct Active
-                    targetObjects[active].transform.GetChild(0).gameObject.tag = "Active";
-                    // save its color to temp
-                    temp = targetObjects[checkActive(gameSequence)].GetComponent<Renderer>().material.color;
-                    // let it light up
-                    targetObjects[active].GetComponent<Renderer>().material.color = new Color(224, 224, 224);
-                }
-            }
-            else
-            {
-                // if wrong sphere fail counter increments 
-                failCounter++;
-                //TODO: fail increment per frame. needs to be reduced to 1 touch per collision 
+                timer = 0;
             }
         }
     }
@@ -211,7 +177,9 @@ public class Game_Manager : MonoBehaviour
     /// <summary>
     void Update()
     {
-        Debug.Log(sequence);
+
+
+        //Debug.Log(sequence);
         Vector3 target_pos = getActive().transform.parent.localPosition;      
         Vector3 sensor_pos = hand.transform.parent.localPosition;
         float diff_dist = Vector3.Distance(target_pos, sensor_pos);
@@ -240,6 +208,62 @@ public class Game_Manager : MonoBehaviour
                 rewardToGive = 1.0f;
             }
 
+        }
+
+        if(timer >= delayBetweenTargets){
+            timer = -1;
+            // if more than than 1 target object 
+            if (targetObjects.Length > 1)
+            {
+                if (touchedSphere == targetObjects[checkActive(gameSequence)])
+                {
+                    collision = true;
+                    Debug.Log("Collided");
+                    agent.GetComponent<ReacherAgent>().AddReward(rewardToGive);
+                    //Debug.Log("rewarded by " + rewardToGive);			
+                    gameSequence++;
+                    rewardToGive = 1.0f;
+                    failCounter = 0;
+                    // sets the tag of GoalOn objct of the touchedSphere to Untagged
+                    touchedSphere.transform.GetChild(0).gameObject.tag = "Untagged";
+                    // set the color of the target back to its original
+                    touchedSphere.GetComponent<Renderer>().material.color = temp;
+                    if (gameSequence > 3)
+                    {
+                        gameSequence = 0;
+                        failCounter = 0;
+                        SequenceEnd = true;
+                        if (RandomSequence == false)
+                        {
+                            initializeFixedRound();
+                            SequenceEnd = false;
+                            gameSequence = 0;
+                        }
+                        else if (RandomSequence == true)
+                        {
+                            initializeNewRound();
+                            SequenceEnd = false;
+                            gameSequence = 0;
+                        }
+                    }
+                    else
+                    {
+                        int active = checkActive(gameSequence);
+                        // sets the tag of the next balls GoalOn objct Active
+                        targetObjects[active].transform.GetChild(0).gameObject.tag = "Active";
+                        // save its color to temp
+                        temp = targetObjects[checkActive(gameSequence)].GetComponent<Renderer>().material.color;
+                        // let it light up
+                        targetObjects[active].GetComponent<Renderer>().material.color = new Color(224, 224, 224);
+                    }
+                }
+                else
+                {
+                    // if wrong sphere fail counter increments 
+                    failCounter++;
+                    //TODO: fail increment per frame. needs to be reduced to 1 touch per collision 
+                }
+            }
         }
 
         else if(UseCurriculum == true)
@@ -279,6 +303,17 @@ public class Game_Manager : MonoBehaviour
                 }
                 
             }
+        }
+        // Update the timer
+        if(timer < delayBetweenTargets && timer != -1){
+            timer++;
+            Debug.Log("Timer:" + timer);
+        }
+
+        if(timer == -1 && isWaiting){
+            isWaiting = false;
+        }else if(timer != -1 && !isWaiting){
+            isWaiting = true;
         }
     }
 }
